@@ -17,7 +17,7 @@ import {
   editFileName,
   imageFileFilter,
 } from 'src/common/utils/file-upload.utils';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Image')
 @Controller('image')
@@ -27,12 +27,19 @@ export class ImageController {
     private readonly imageRepository: Repository<Image>,
   ) {}
 
-  // @Post('upload')
-  // @UseInterceptors(FileInterceptor('photo', { dest: './uploads' }))
-  // uploadSingle(@UploadedFile() file) {
-  //   console.log(file);
-  // }
   @Post()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -42,7 +49,9 @@ export class ImageController {
       fileFilter: imageFileFilter,
     }),
   )
-  async uploadedFile(@UploadedFile() file) {
+  async uploadedFile(
+    @UploadedFile() file,
+  ): Promise<{ originalname: any; filename: any }> {
     const response = {
       originalname: file.originalname,
       filename: file.filename,
@@ -54,6 +63,7 @@ export class ImageController {
   seeUploadedFile(@Param('imgpath') image, @Res() res) {
     return res.sendFile(image, { root: './files' });
   }
+
   @Post('uploads')
   @UseInterceptors(FilesInterceptor('photos[]', 10, { dest: './uploads' }))
   uploadMultiple(@UploadedFiles() files) {
