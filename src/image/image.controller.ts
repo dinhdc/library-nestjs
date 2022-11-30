@@ -17,7 +17,9 @@ import {
   editFileName,
   imageFileFilter,
 } from 'src/common/utils/file-upload.utils';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Image')
 @Controller('image')
 export class ImageController {
   constructor(
